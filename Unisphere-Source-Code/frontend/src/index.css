@@ -1,0 +1,231 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Geist:wght@300..800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@import "tailwindcss";
+@variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* Typography (replaced site-wide as requested) */
+  --font-sans: 'Geist', ui-sans-serif, system-ui, sans-serif;
+  --font-heading: 'Fraunces', ui-serif, Georgia, serif;
+  --font-display: 'Fraunces', ui-serif, Georgia, serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Editorial palette Ã¢â‚¬â€ exposed to Tailwind as bg-*, text-*, border-* utilities */
+  --color-background: #F7F4EE;
+  --color-foreground: #131516;
+  --color-card: #FFFFFF;
+  --color-card-foreground: #131516;
+  --color-popover: #FFFFFF;
+  --color-popover-foreground: #131516;
+  --color-primary: #131516;
+  --color-primary-foreground: #F7F4EE;
+  --color-secondary: #EBE5D8;
+  --color-secondary-foreground: #131516;
+  --color-muted: #EBE5D8;
+  --color-muted-foreground: #5A5854;
+  --color-accent: #D4F542;
+  --color-accent-foreground: #131516;
+  --color-sage: #28473D;
+  --color-sage-foreground: #F7F4EE;
+  --color-destructive: #D9434F;
+  --color-destructive-foreground: #FFFFFF;
+  --color-border: #DCD5C5;
+  --color-input: #DCD5C5;
+  --color-ring: #131516;
+
+  --radius: 0.75rem;
+}
+
+/* Dark mode overrides (Tailwind v4 Ã¢â‚¬â€ swap @theme variables) */
+.dark {
+  --color-background: #101213;
+  --color-foreground: #F2EEE3;
+  --color-card: #16191B;
+  --color-card-foreground: #F2EEE3;
+  --color-popover: #16191B;
+  --color-popover-foreground: #F2EEE3;
+  --color-primary: #F2EEE3;
+  --color-primary-foreground: #131516;
+  --color-secondary: #1D2123;
+  --color-secondary-foreground: #F2EEE3;
+  --color-muted: #1D2123;
+  --color-muted-foreground: #9C988B;
+  --color-accent: #D4F542;
+  --color-accent-foreground: #131516;
+  --color-sage: #3E6B5B;
+  --color-sage-foreground: #F2EEE3;
+  --color-destructive: #E5616B;
+  --color-destructive-foreground: #FFFFFF;
+  --color-border: #292D2F;
+  --color-input: #292D2F;
+  --color-ring: #D4F542;
+}
+
+/* ============================================================
+   Unisphere â€” Legacy Tokens (Tailwind v4 preflight handles reset)
+   ============================================================ */
+
+:root {
+  /* Legacy variables Ã¢â‚¬â€ kept so the rest of your app keeps working */
+  --bg:           #F7F4EE;
+  --bg-card:      #FFFFFF;
+  --bg-card-alt:  #EBE5D8;
+  --border:       #DCD5C5;
+
+  --primary:      #131516;
+  --primary-glow: rgba(212, 245, 66, 0.25);
+  --teal:         #28473D;
+  --amber:        #D4F542;
+  --red:          #D9434F;
+
+  --text:         #5A5854;
+  --text-h:       #131516;
+
+  --font-body:    'Geist', system-ui, sans-serif;
+  --font-heading: 'Fraunces', ui-serif, Georgia, serif;
+
+  --nav-h: 64px;
+  --section-px: clamp(24px, 5vw, 80px);
+  --max-w: 1320px;
+
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+}
+
+[data-theme="dark"], .dark {
+  --bg:           #101213;
+  --bg-card:      #16191B;
+  --bg-card-alt:  #1D2123;
+  --border:       #292D2F;
+
+  --primary:      #F2EEE3;
+  --primary-glow: rgba(212, 245, 66, 0.35);
+  --teal:         #3E6B5B;
+  --amber:        #D4F542;
+  --red:          #E5616B;
+
+  --text:         #9C988B;
+  --text-h:       #F2EEE3;
+}
+
+html {
+  scroll-behavior: smooth;
+  /* `clip` prevents horizontal scroll without creating a scroll container,
+     so `position: sticky` on the navbar keeps working. */
+  overflow-x: clip;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: 'ss01', 'ss02', 'cv01';
+}
+
+::selection {
+  background: var(--color-accent);
+  color: var(--color-accent-foreground);
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--color-background); }
+::-webkit-scrollbar-thumb { background: var(--color-foreground); border-radius: 99px; opacity: 0.4; }
+
+/* ============================================================
+   Editorial utility classes used by the landing page
+   ============================================================ */
+
+.font-display {
+  font-family: 'Fraunces', ui-serif, Georgia, serif;
+  font-optical-sizing: auto;
+  letter-spacing: -0.02em;
+}
+
+.font-mono {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+.text-balance { text-wrap: balance; }
+
+.grain { position: relative; }
+.grain::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.06;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.6'/></svg>");
+}
+
+.gradient-mask-b {
+  -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent);
+          mask-image: linear-gradient(to bottom, black 60%, transparent);
+}
+
+.ring-soft {
+  box-shadow: 0 1px 0 0 var(--color-border),
+              0 24px 60px -28px rgba(0, 0, 0, 0.18);
+}
+.dark .ring-soft {
+  box-shadow: 0 1px 0 0 var(--color-border),
+              0 24px 60px -20px rgba(0, 0, 0, 0.6);
+}
+
+.marquee {
+  display: inline-flex;
+  gap: 3rem;
+  animation: marquee 38s linear infinite;
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@keyframes float-y {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-10px); }
+}
+.animate-float { animation: float-y 6s ease-in-out infinite; }
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.rise   { animation: rise 0.9s cubic-bezier(.2,.7,.2,1) both; }
+.rise-1 { animation-delay: 0.05s; }
+.rise-2 { animation-delay: 0.15s; }
+.rise-3 { animation-delay: 0.25s; }
+.rise-4 { animation-delay: 0.35s; }
+.rise-5 { animation-delay: 0.45s; }
+
+.underline-citron {
+  background-image: linear-gradient(transparent 62%, var(--color-accent) 62%, var(--color-accent) 92%, transparent 92%);
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+}
+
+.dotted-grid {
+  background-image: radial-gradient(var(--color-border) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+.hover-lift {
+  transition: transform .35s cubic-bezier(.2,.7,.2,1), box-shadow .35s ease;
+}
+.hover-lift:hover {
+  transform: translateY(-4px);
+}
