@@ -313,7 +313,10 @@ export default function ClubProfile() {
              <p className="text-indigo-100 text-sm mb-6 leading-relaxed">
                Registered members get access to exclusive workshops, discussion groups, and early event notifications.
              </p>
-             <Button className="w-full bg-white text-indigo-600 hover:bg-indigo-50 border-none font-bold">
+             <Button
+               className="w-full bg-white text-indigo-600 hover:bg-indigo-50 border-none font-bold"
+               onClick={() => navigate('/messages')}
+             >
                 <MessageSquare className="mr-2 h-4 w-4" /> Message Club
              </Button>
            </section>
