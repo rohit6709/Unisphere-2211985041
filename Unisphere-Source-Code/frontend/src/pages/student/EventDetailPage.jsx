@@ -60,7 +60,8 @@ export default function EventDetailPage() {
   if (isLoading) return <EventDetailSkeleton />;
   if (isError || !event) return <EventErrorState />;
 
-  const isRegistrationOpen = new Date() < new Date(event.registrationDeadline) && event.status !== 'completed';
+   const isEventFinished = ['completed', 'archived'].includes(event.status);
+   const isRegistrationOpen = new Date() < new Date(event.registrationDeadline) && !isEventFinished;
   const isRegistered = !!registration;
 
   return (
@@ -95,6 +96,11 @@ export default function EventDetailPage() {
                         <span className="bg-indigo-600 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-lg shadow-indigo-500/20">
                            {event.type}
                         </span>
+                                    {isEventFinished && (
+                                       <span className="bg-emerald-600 text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-lg shadow-emerald-500/20">
+                                          {event.status}
+                                       </span>
+                                    )}
                      </div>
                      
                      <h1 className="text-4xl md:text-6xl font-black text-gray-900 dark:text-white leading-tight tracking-tighter">
@@ -170,13 +176,15 @@ export default function EventDetailPage() {
          <div className="space-y-6">
             <div className="sticky top-24 bg-white dark:bg-gray-900 rounded-[3rem] border border-gray-100 dark:border-gray-800 p-8 shadow-2xl shadow-indigo-500/5 space-y-8">
                <div className="space-y-2">
-                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Registration Status</p>
+                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                    {isEventFinished ? 'Event Status' : 'Registration Status'}
+                  </p>
                   <div className="flex items-center justify-between">
                      <h3 className={cn(
                         "text-xl font-black",
-                        isRegistrationOpen ? "text-emerald-500" : "text-rose-500"
+                        isEventFinished ? "text-slate-500" : isRegistrationOpen ? "text-emerald-500" : "text-rose-500"
                      )}>
-                        {isRegistrationOpen ? 'Open Now' : 'Closed'}
+                        {isEventFinished ? 'Completed' : isRegistrationOpen ? 'Open Now' : 'Closed'}
                      </h3>
                      <Clock className="h-5 w-5 text-gray-300" />
                   </div>
@@ -197,7 +205,20 @@ export default function EventDetailPage() {
                   </div>
                </div>
 
-               {isRegistered ? (
+               {isEventFinished ? (
+                  <div className="bg-slate-50 dark:bg-slate-950/20 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 text-center space-y-3">
+                     <CheckCircle2 className="h-10 w-10 text-slate-500 mx-auto" />
+                     <p className="text-sm font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest">Event Completed</p>
+                     <p className="text-xs text-slate-600 dark:text-slate-400 font-medium">
+                        {isRegistered
+                          ? `You were registered for this event${registration?.event?.reviewedBy ? `, approved by ${registration.event.reviewedBy.name}` : ''}.`
+                          : 'This event has ended.'}
+                     </p>
+                     <Link to="/my-registrations">
+                        <Button variant="ghost" size="sm" className="w-full text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-900/50">View My Registrations</Button>
+                     </Link>
+                  </div>
+               ) : isRegistered ? (
                   <div className="bg-emerald-50 dark:bg-emerald-950/20 p-6 rounded-2xl border border-emerald-100 dark:border-emerald-900/30 text-center space-y-3">
                      <CheckCircle2 className="h-10 w-10 text-emerald-500 mx-auto" />
                      <p className="text-sm font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest">You're Registered!</p>
