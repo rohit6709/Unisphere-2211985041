@@ -101,3 +101,7 @@ sketch
 backend/node_modules
 backend/.env
 frontend/.env
+
+frontend/src/pages/student/EventDetailPage.jsx
+frontend/src/pages/clubs/ClubProfile.jsx
+frontend/src/pages/chat/MessagingHub.jsx
