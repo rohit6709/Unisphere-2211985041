@@ -280,8 +280,10 @@ const getMyRegistrations = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10, status } = req.query;
 
     const filter = {
-        student: req.user._id,
-        status: status || "registered"
+        student: req.user._id
+    }
+    if(status){
+        filter.status = status;
     }
 
     const skip = Number((page) - 1) * Number(limit);
@@ -290,8 +292,11 @@ const getMyRegistrations = asyncHandler(async (req, res) => {
         Registration.find(filter)
             .populate({
                 path: "event",
-                select: "title eventType status startsAt endsAt venue maxParticipants posterUrl club",
-                populate: { path: "club", select: "name department" }
+                select: "title eventType status startsAt endsAt venue maxParticipants posterUrl club reviewedBy reviewedAt",
+                populate: [
+                    { path: "club", select: "name department" },
+                    { path: "reviewedBy", select: "name employeeId department" }
+                ]
             })
             .sort({ registeredAt: -1 })
             .skip(skip)

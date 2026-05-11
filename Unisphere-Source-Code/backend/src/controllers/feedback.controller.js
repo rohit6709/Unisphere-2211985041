@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { Feedback } from '../models/feedback.model.js';
 import { Registration } from '../models/registration.model.js';
 import { Event } from '../models/event.model.js';
@@ -41,12 +42,13 @@ const submitFeedback = asyncHandler(async (req, res) => {
 
 const getEventFeedback = asyncHandler(async (req, res) => {
     const { eventId } = req.params;
+    const eventObjectId = new mongoose.Types.ObjectId(eventId);
     const feedbacks = await Feedback.find({ event: eventId })
         .populate('student', 'name profilePicture')
         .sort({ createdAt: -1 });
 
     const stats = await Feedback.aggregate([
-        { $match: { event: eventId } },
+        { $match: { event: eventObjectId } },
         { $group: { _id: null, averageRating: { $avg: "$rating" }, totalReviews: { $sum: 1 } } }
     ]);
 

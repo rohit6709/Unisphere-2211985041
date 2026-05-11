@@ -188,7 +188,7 @@ const getMyRooms = asyncHandler(async (req, res) => {
     const clubQuery = ["admin", "superadmin"].includes(req.user.role)
         ? []
         : ["faculty", "hod"].includes(req.user.role)
-            ? Club.find({ advisors: userId, status: "active" }).select("name department").lean()
+            ? Club.find({ advisors: userId, status: "active" }).select("name department members").lean()
             : Club.find({
                 status: "active",
                 $or: [
@@ -196,12 +196,12 @@ const getMyRooms = asyncHandler(async (req, res) => {
                     { president: userId },
                     { vicePresident: userId }
                 ]
-            }).select("name department").lean();
+            }).select("name department members").lean();
 
     const eventGroupQuery = ["admin", "superadmin"].includes(req.user.role)
         ? []
         : EventGroup.find({ "members.user": userObjId, status: "active" })
-            .select("name event status")
+            .select("name event status club members")
             .populate("event", "title")
             .lean();
 
@@ -255,6 +255,7 @@ const getMyRooms = asyncHandler(async (req, res) => {
             roomId: club._id,
             name: club.name,
             department: club.department || null,
+            members: club.members || [],
             status: "active",
             lastMessage: lastMessageMap.get(`Club:${club._id}`) || null
         })),
@@ -263,6 +264,9 @@ const getMyRooms = asyncHandler(async (req, res) => {
             roomId: group._id,
             name: group.name,
             eventTitle: group.event?.title || null,
+            eventId: group.event?._id || group.event || null,
+            clubId: group.club || null,
+            members: group.members || [],
             status: group.status,
             lastMessage: lastMessageMap.get(`EventGroup:${group._id}`) || null
         })),

@@ -120,6 +120,10 @@ export const initSocketServer = (httpServer) => {
             });
         }
 
+        socket.on("presence_sync", () => {
+            socket.emit("presence_snapshot", { userIds: getOnlineUserIds() });
+        });
+
         registerChatHandlers(_io, socket);
 
         socket.on("disconnect", (reason) => {

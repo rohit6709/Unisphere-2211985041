@@ -4,7 +4,7 @@ import { Event } from '../models/event.model.js';
 import { Club } from '../models/club.model.js';
 import { Registration } from '../models/registration.model.js';
 import { EventGroup } from '../models/eventGroup.model.js';
-import { ApprovalLog } from '../models/approvalLog.model.js';
+import { ApprovalLog } from '../models/approvallog.model.js';
 import { ApiError } from '../utils/ApiError.js';
 import { ApiResponse } from '../utils/ApiResponse.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
@@ -841,12 +841,20 @@ const getPublicEvent = asyncHandler(async (req, res) => {
     const { eventId } = req.params;
     validateObjectId(eventId, "event ID");
 
-    const event = await Event.findOne({
-        _id: eventId,
-        status: { $in: ["approved", "live"] }
-    }).populate("club", "name department tags members");
+    const event = await Event.findById(eventId).populate("club", "name department tags members");
 
     if(!event){
+        throw new ApiError(404, "Event not found");
+    }
+
+    const isRegistered = await Registration.exists({
+        event: eventId,
+        student: req.user._id,
+        status: { $in: ["registered", "attended", "no_show"] }
+    });
+
+    const isPubliclyViewable = ["approved", "live"].includes(event.status);
+    if(!isPubliclyViewable && !isRegistered){
         throw new ApiError(404, "Event not found");
     }
 

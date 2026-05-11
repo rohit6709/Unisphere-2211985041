@@ -1,7 +1,7 @@
 import { Worker } from "bullmq";
 import { redisConnection } from "../queue.js";
 import { EventGroup } from "../../models/eventGroup.model.js";
-import { ApprovalLog } from "../../models/approvalLog.model.js";
+import { ApprovalLog } from "../../models/approvallog.model.js";
 
 export const processDissolveGroup = async (job) => {
     const { eventGroupId, eventId, clubId } = job.data;
