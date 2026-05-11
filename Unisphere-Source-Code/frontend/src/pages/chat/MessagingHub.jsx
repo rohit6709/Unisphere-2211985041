@@ -90,6 +90,17 @@ export default function MessagingHub() {
     });
   }, [roomsQuery.data, roomSearch, lastSeenMap]);
 
+  const activeRoomMemberIds = React.useMemo(() => {
+    if (!activeRoom || !['Club', 'EventGroup'].includes(activeRoom.roomType)) {
+      return [];
+    }
+
+    const members = Array.isArray(activeRoom.members) ? activeRoom.members : [];
+    return members
+      .map((member) => (member?.user?._id || member?.user || member?._id || member)?.toString?.())
+      .filter(Boolean);
+  }, [activeRoom]);
+
   React.useEffect(() => {
     if (!activeRoom && rooms.length) {
       setActiveRoom(rooms[0]);
@@ -123,17 +134,13 @@ export default function MessagingHub() {
   );
 
   const onlineMemberCount = React.useMemo(() => {
-    const memberIds = new Set(
-      flattenedMessages
-        .map((message) => (message.sender?._id || message.sender)?.toString?.())
-        .filter(Boolean)
-    );
+    const memberIds = new Set(activeRoomMemberIds);
     let count = 0;
     memberIds.forEach((memberId) => {
       if (onlineUsers.has(memberId)) count += 1;
     });
     return count;
-  }, [flattenedMessages, onlineUsers]);
+  }, [activeRoomMemberIds, onlineUsers]);
 
   const markRoomSeen = React.useCallback((room, timestamp = new Date().toISOString()) => {
     if (!room) return;
@@ -164,6 +171,50 @@ export default function MessagingHub() {
       });
     };
   }, [socket, rooms]);
+
+  React.useEffect(() => {
+    if (!socket) return;
+
+    const handleTyping = ({ userId, name, isTyping }) => {
+      if (userId === user?._id) return;
+      setTypingUsers((current) => {
+        const next = new Set(current);
+        if (isTyping) next.add(name);
+        else next.delete(name);
+        return next;
+      });
+    };
+
+    const handlePresenceSnapshot = ({ userIds = [] }) => {
+      setOnlineUsers(new Set(userIds.map((id) => id.toString())));
+    };
+
+    const handlePresenceChanged = ({ userId, isOnline }) => {
+      setOnlineUsers((current) => {
+        const next = new Set(current);
+        if (isOnline) next.add(userId.toString());
+        else next.delete(userId.toString());
+        return next;
+      });
+    };
+
+    const handleChatError = ({ message }) => toast.error(message);
+
+    socket.on('user_typing', handleTyping);
+    socket.on('presence_snapshot', handlePresenceSnapshot);
+    socket.on('presence_changed', handlePresenceChanged);
+    socket.on('chat_error', handleChatError);
+
+    // Ensure we always get a current online snapshot even if initial connect snapshot was missed.
+    socket.emit('presence_sync');
+
+    return () => {
+      socket.off('user_typing', handleTyping);
+      socket.off('presence_snapshot', handlePresenceSnapshot);
+      socket.off('presence_changed', handlePresenceChanged);
+      socket.off('chat_error', handleChatError);
+    };
+  }, [socket, user?._id]);
 
   React.useEffect(() => {
     if (!socket || !activeRoom) return;
@@ -261,29 +312,6 @@ export default function MessagingHub() {
       });
     };
 
-    const handleTyping = ({ userId, name, isTyping }) => {
-      if (userId === user?._id) return;
-      setTypingUsers((current) => {
-        const next = new Set(current);
-        if (isTyping) next.add(name);
-        else next.delete(name);
-        return next;
-      });
-    };
-
-    const handlePresenceSnapshot = ({ userIds = [] }) => {
-      setOnlineUsers(new Set(userIds.map((id) => id.toString())));
-    };
-
-    const handlePresenceChanged = ({ userId, isOnline }) => {
-      setOnlineUsers((current) => {
-        const next = new Set(current);
-        if (isOnline) next.add(userId.toString());
-        else next.delete(userId.toString());
-        return next;
-      });
-    };
-
     const handleConversationCreated = ({ room }) => {
       if (!room) return;
       queryClient.setQueryData(['messaging-hub-rooms'], (current = []) => {
@@ -297,22 +325,14 @@ export default function MessagingHub() {
 
     socket.on('new_message', handleNewMessage);
     socket.on('message_deleted', handleMessageDeleted);
-    socket.on('user_typing', handleTyping);
-    socket.on('presence_snapshot', handlePresenceSnapshot);
-    socket.on('presence_changed', handlePresenceChanged);
     socket.on('conversation_created', handleConversationCreated);
-    socket.on('chat_error', ({ message }) => toast.error(message));
 
     return () => {
       socket.off('new_message', handleNewMessage);
       socket.off('message_deleted', handleMessageDeleted);
-      socket.off('user_typing', handleTyping);
-      socket.off('presence_snapshot', handlePresenceSnapshot);
-      socket.off('presence_changed', handlePresenceChanged);
       socket.off('conversation_created', handleConversationCreated);
-      socket.off('chat_error');
     };
-  }, [socket, activeRoom, queryClient, user?._id, markRoomSeen]);
+  }, [socket, activeRoom, queryClient, markRoomSeen]);
 
   React.useEffect(() => {
     if (!prependingRef.current) {
@@ -460,7 +480,7 @@ export default function MessagingHub() {
           )}
           <div className={mine ? 'text-right' : 'text-left'}>
             {!mine && <p className="mb-1 text-[11px] font-semibold uppercase tracking-wide text-gray-500">{message.sender?.name || 'Unknown'}</p>}
-            <div className={`rounded-[24px] px-4 py-3 text-sm shadow-sm ${
+            <div className={`rounded-3xl px-4 py-3 text-sm shadow-sm ${
               deleted
                 ? 'border border-dashed border-gray-300 bg-gray-50 text-gray-700 dark:border-gray-700 dark:bg-gray-900/40 dark:text-gray-300'
                 : mine
@@ -489,7 +509,7 @@ export default function MessagingHub() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-6">
-      <div className="overflow-hidden rounded-[2rem] border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-950">
+      <div className="overflow-hidden rounded-4xl border border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-950">
         <div className="grid min-h-[75vh] md:grid-cols-[340px_1fr]">
           <aside className={`border-r border-gray-100 bg-gray-50/70 dark:border-gray-800 dark:bg-gray-900/40 ${activeRoom ? 'hidden md:block' : 'block'}`}>
             <div className="border-b border-gray-100 p-5 dark:border-gray-800">
@@ -636,7 +656,7 @@ export default function MessagingHub() {
                       value={messageText}
                       onChange={(event) => handleTyping(event.target.value)}
                       placeholder="Write a message..."
-                      className="min-h-[52px] flex-1 rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-indigo-400 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-100"
+                      className="min-h-13 flex-1 rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-indigo-400 dark:border-gray-800 dark:bg-gray-950 dark:text-gray-100"
                     />
                     <Button type="submit" disabled={!messageText.trim() || !isConnected}>
                       {roomMessagesQuery.isFetching ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
