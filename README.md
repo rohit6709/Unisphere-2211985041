@@ -16,15 +16,6 @@ Unisphere replaces scattered WhatsApp groups, paper flyers, and word-of-mouth wi
 
 ---
 
-# Team Members
-
-|        Name         | Roll Number |
-| ------------------- | ----------- |
-|     Rohit Dogra     | 2211985041  |
-
-
----
-
 ## Key Features
 
 ### Interest-Based Club Discovery
@@ -180,6 +171,15 @@ cd frontend && npm run dev
 - Passwords hashed with `bcrypt` — never stored in plain text
 - Role-based access control across 4 roles — `student`, `faculty`, `admin`, `superAdmin` — enforced at middleware level before controllers are reached
 - Rate limiting applied across all API endpoints — socket connections excluded
+---
+
+# Team Member
+
+|        Name         | Roll Number |
+| ------------------- | ----------- |
+|     Rohit Dogra     | 2211985041  |
+
+
 ---
 
 ## License
