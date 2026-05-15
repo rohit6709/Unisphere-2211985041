@@ -163,8 +163,24 @@ export default function EditEventPage() {
       posterUrl: event.posterUrl || '',
     };
     setForm(nextForm);
-    setInitialPayloadSnapshot(JSON.stringify(buildPayload(nextForm)));
-  }, [eventQuery.data, buildPayload]);
+    // Build payload snapshot directly without buildPayload to avoid circular dependency
+    setInitialPayloadSnapshot(JSON.stringify({
+      title: nextForm.title.trim(),
+      description: nextForm.description.trim(),
+      eventType: nextForm.eventType,
+      visibility: nextForm.clubOnly ? 'club_only' : 'open',
+      startsAt: toIso(nextForm.startsAt),
+      endsAt: toIso(nextForm.endsAt),
+      registrationDeadline: toIso(nextForm.registrationDeadline),
+      duration: Math.max(1, Math.round((new Date(toIso(nextForm.endsAt)) - new Date(toIso(nextForm.startsAt))) / (1000 * 60))),
+      venue: {
+        name: nextForm.location.trim(),
+        building: nextForm.building.trim() || undefined,
+      },
+      maxParticipants: Number(nextForm.maxParticipants),
+      posterUrl: nextForm.posterUrl || undefined,
+    }));
+  }, [eventQuery.data]);
 
   const updateMutation = useMutation({
     mutationFn: ({ clubId, payload }) => updateEvent(clubId, eventId, payload),
