@@ -125,7 +125,7 @@ export default function FacultyDashboard() {
             
             <div className="space-y-4">
               {events.slice(0, 5).map(event => (
-                <Link to={`/events/${event._id}`} key={event._id} className="flex gap-4 items-center p-3 rounded-xl hover:bg-[var(--bg-card-alt)] transition-colors">
+                <Link to="/faculty/events/review" key={event._id} className="flex gap-4 items-center p-3 rounded-xl hover:bg-[var(--bg-card-alt)] transition-colors">
                   <div className="w-10 h-10 rounded-xl bg-[var(--primary-glow)] flex items-center justify-center text-[var(--primary)] shrink-0">
                     <CalendarDays className="w-5 h-5" />
                   </div>
