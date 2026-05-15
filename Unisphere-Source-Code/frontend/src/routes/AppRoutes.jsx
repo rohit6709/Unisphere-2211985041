@@ -49,6 +49,7 @@ const EventDetailPage      = lazy(() => import('@/pages/student/EventDetailPage'
 // ─── Faculty Pages (lazy) ─────────────────────────────────────────────────────
 const FacultyDashboard          = lazy(() => import('@/pages/faculty/FacultyDashboard'));
 const FacultyClubManagementPage = lazy(() => import('@/pages/faculty/ClubManagementPage'));
+const FacultyEventsPage         = lazy(() => import('@/pages/faculty/FacultyEventsPage'));
 const EventReviewPage           = lazy(() => import('@/pages/faculty/EventReviewPage'));
 const FacultyNoticeManagement   = lazy(() => import('@/pages/faculty/NoticeManagementPage'));
 const FacultyProfilePage        = lazy(() => import('@/pages/faculty/FacultyProfilePage'));
@@ -93,6 +94,16 @@ const DashboardRedirect = () => {
   const { role } = useAuth();
 
   return <Navigate to={getDashboardPath(role)} replace />;
+};
+
+const EventsRouteRedirect = () => {
+  const { role } = useAuth();
+
+  if (role === 'faculty' || role === 'hod') {
+    return <Navigate to="/faculty/events" replace />;
+  }
+
+  return <EventDirectory />;
 };
 
 // ─── 404 Page ─────────────────────────────────────────────────────────────────
@@ -141,7 +152,7 @@ export const AppRoutes = () => {
 
             {/* ── Shared Routes (all authenticated roles) ────────────── */}
             <Route path="/discovery"        element={<DiscoveryPage />} />
-            <Route path="/events"           element={<EventDirectory />} />
+            <Route path="/events"           element={<EventsRouteRedirect />} />
             <Route path="/events/:id"       element={<EventProfile />} />
             <Route path="/clubs"            element={<ClubDirectory />} />
             <Route path="/clubs/:id"        element={<ClubProfile />} />
@@ -176,7 +187,8 @@ export const AppRoutes = () => {
               <Route path="/dashboard/faculty"  element={<FacultyDashboard />} />
               <Route path="/faculty/clubs"      element={<FacultyClubManagementPage />} />
               <Route path="/clubs/request"      element={<RequestClubPage />} />
-              <Route path="/faculty/events"     element={<EventReviewPage />} />
+              <Route path="/faculty/events"     element={<FacultyEventsPage />} />
+              <Route path="/faculty/events/review" element={<EventReviewPage />} />
               <Route path="/faculty/notices"    element={<FacultyNoticeManagement />} />
               <Route path="/profile/faculty"    element={<FacultyProfilePage />} />
             </Route>
