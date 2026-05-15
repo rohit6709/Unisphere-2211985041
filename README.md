@@ -16,6 +16,15 @@ Unisphere replaces scattered WhatsApp groups, paper flyers, and word-of-mouth wi
 
 ---
 
+# Team Members
+
+|        Name         | Roll Number |
+| ------------------- | ----------- |
+|     Rohit Dogra     | 2211985041  |
+
+
+---
+
 ## Key Features
 
 ### Interest-Based Club Discovery
@@ -126,6 +135,11 @@ FRONTEND_URL=http://localhost:5173
 REDIS_HOST=your_redis_host
 REDIS_PORT=6379
 REDIS_PASSWORD=your_redis_password
+
+# Cloudinary
+CLOUDINARY_CLOUD_NAME = "your_cloudinary_cloud_name"
+CLOUDINARY_API_KEY = "your_cloudinary_api_key"
+CLOUDINARY_API_SECRET = "your_cloudinary_api_secret"
 ```
 
 **3. Setup the Frontend**
