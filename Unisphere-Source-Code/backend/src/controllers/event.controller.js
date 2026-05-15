@@ -383,6 +383,10 @@ const reviewEvent = asyncHandler(async (req, res) => {
         event.rejectionReason = null;
         await event.save();
 
+        // Clear cache so approved event appears in public listings
+        clearCache(`/events/public/${eventId}`);
+        clearCache('/events/public');
+
         const club = await Club.findById(event.club._id).select("president vicePresident advisors");
 
         const group = await createEventGroup(event, club);
@@ -454,6 +458,10 @@ const reviewEvent = asyncHandler(async (req, res) => {
         event.reviewedAt = new Date();
         event.rejectionReason = finalRejectionReason;
         await event.save();
+
+        // Clear cache so rejected event is removed from public listings
+        clearCache(`/events/public/${eventId}`);
+        clearCache('/events/public');
 
         await createLog({
             eventId: event._id,
@@ -555,6 +563,10 @@ const cancelEvent = asyncHandler(async (req, res) => {
         }).catch(err => console.error(`Failed to send event cancellation notification for event ${event._id}:`, err.message));
     }
 
+    // Public student event endpoints are cached; purge stale entries after status change.
+    clearCache(`/events/public/${eventId}`);
+    clearCache('/events/public');
+
     return res.status(200).json(new ApiResponse(200, event, "Event cancelled successfully"));
 })
 
@@ -608,7 +620,8 @@ const getClubEvents = asyncHandler(async (req, res) => {
 const getPendingEvents = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10 } = req.query;
 
-    const filter = { status: "pending_approval" };
+    // Show events of all statuses for the advisor view, but scope to relevant clubs below.
+    const filter = {};
     
     // Non-admins only see their advised club events
     if(!["admin", "superadmin"].includes(req.user.role)){
@@ -636,20 +649,22 @@ const getPendingEvents = asyncHandler(async (req, res) => {
 const getAdviseePendingEvents = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10 } = req.query;
 
-    const filter = { status: "pending_approval" };
+    // Default: admins see everything. HODs and faculty should see events for their
+    // clubs plus all globally approved events so advisors can monitor published activity.
+    const filter = {};
 
-    if(["admin", "superadmin"].includes(req.user.role)){
-        // Admin users can inspect all pending events.
-    } else if(req.user.role === "hod"){
+    if (["admin", "superadmin"].includes(req.user.role)) {
+        // no additional filters
+    } else if (req.user.role === "hod") {
         const deptFilter = { department: req.user.department };
         const deptClubs = await Club.find(deptFilter).select("_id");
         const clubIds = deptClubs.map((club) => club._id);
-        filter.club = { $in: clubIds };
+        filter.$or = [ { club: { $in: clubIds } }, { status: 'approved' } ];
     } else {
-        // Faculty users only see clubs they advise.
+        // Faculty users only see clubs they advise plus approved events
         const advisedClubs = await Club.find({ advisors: req.user._id }).select("_id");
         const clubIds = advisedClubs.map((club) => club._id);
-        filter.club = { $in: clubIds };
+        filter.$or = [ { club: { $in: clubIds } }, { status: 'approved' } ];
     }
 
     const skip = (Number(page) - 1) * Number(limit);
@@ -662,13 +677,26 @@ const getAdviseePendingEvents = asyncHandler(async (req, res) => {
     const events = eventsResult.status === "fulfilled" ? eventsResult.value : [];
     const total = totalResult.status === "fulfilled" ? totalResult.value : 0;
 
+    // For debugging: include resolved club ids and role so frontend can show why
+    // zero results might occur (e.g., no advised clubs, pagination, or status mismatch).
+    let resolvedClubIds = null;
+    if (["admin", "superadmin"].includes(req.user.role)) {
+        resolvedClubIds = 'all';
+    } else if (req.user.role === 'hod') {
+        const deptClubs = await Club.find({ department: req.user.department }).select('_id');
+        resolvedClubIds = deptClubs.map(c => c._id.toString());
+    } else {
+        const advisedClubs = await Club.find({ advisors: req.user._id }).select('_id');
+        resolvedClubIds = advisedClubs.map(c => c._id.toString());
+    }
+
     return res.status(200)
         .json(new ApiResponse(200, {events, pagination: {
             total,
             page: Number(page),
             limit: Number(limit),
             totalPages: Math.ceil(total / Number(limit))
-        }}, "Advisee pending events retrieved successfully"));   
+        }, debug: { role: req.user.role, resolvedClubIds }}, "Advisee pending events retrieved successfully"));   
 })
 
 //All club roles : single event details
@@ -687,9 +715,12 @@ const getEvent = asyncHandler(async (req, res) => {
         
         // Draft check
         if(event.status === "draft"){
-            const isAuthorized = ["admin", "superadmin"].includes(req.user.role) || 
-                                event.submittedBy.toString() === req.user._id.toString();
-            if(!isAuthorized) throw new ApiError(403, "Members cannot view draft events");
+            const isEventCreator = event.submittedBy.toString() === req.user._id.toString();
+            const isAdmin = ["admin", "superadmin"].includes(req.user.role);
+            const isClubLeadership = req.clubRole && ["president", "vicePresident", "admin"].includes(req.clubRole);
+            
+            const isAuthorized = isAdmin || isEventCreator || isClubLeadership;
+            if(!isAuthorized) throw new ApiError(403, "You do not have permission to view this draft event");
         }
 
         return res.status(200)
