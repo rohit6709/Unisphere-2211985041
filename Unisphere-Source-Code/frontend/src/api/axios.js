@@ -139,6 +139,16 @@ api.interceptors.request.use((config) => {
     config.url = normalizeUrl(config.url);
   }
 
+  if (config.data instanceof FormData && config.headers) {
+    if (typeof config.headers.set === 'function') {
+      config.headers.delete('Content-Type');
+      config.headers.delete('content-type');
+    } else {
+      delete config.headers['Content-Type'];
+      delete config.headers['content-type'];
+    }
+  }
+
   return config;
 });
 
