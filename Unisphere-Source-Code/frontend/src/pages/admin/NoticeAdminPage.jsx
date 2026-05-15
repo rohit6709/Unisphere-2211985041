@@ -15,6 +15,7 @@ import {
   CheckCircle2,
   XCircle,
   Eye,
+  EyeOff,
   X
 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -28,7 +29,7 @@ import { Select } from '@/components/ui/Select';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { cn } from '@/utils/cn';
-import { createNotice } from '@/services/noticeService';
+import { createNotice, updateNotice } from '@/services/noticeService';
 
 export default function NoticeAdminPage() {
   useDocumentTitle('Platform Announcements | Unisphere');
@@ -87,6 +88,16 @@ export default function NoticeAdminPage() {
       });
     },
     onError: (err) => toast.error(err.response?.data?.message || 'Failed to publish notice'),
+  });
+
+  const toggleMutation = useMutation({
+    mutationFn: (noticeId) => updateNotice(noticeId, { isActive: !data.find(n => n._id === noticeId)?.isActive }),
+    onSuccess: () => {
+      toast.success('Notice visibility updated');
+      queryClient.invalidateQueries({ queryKey: ['notices-admin'] });
+      refetchNotices();
+    },
+    onError: (err) => toast.error(err.response?.data?.message || 'Failed to update notice visibility'),
   });
 
   const handleFormChange = (field, value) => {
@@ -233,8 +244,13 @@ export default function NoticeAdminPage() {
                     </div>
 
                     <div className="flex md:flex-col justify-end gap-2 shrink-0">
-                       <Button variant="ghost" className="rounded-xl h-12 w-12 p-0 text-gray-400 hover:text-rose-600">
-                          <Eye className="h-5 w-5" />
+                       <Button 
+                         variant="ghost" 
+                         className={cn("rounded-xl h-12 w-12 p-0 transition-colors", notice.isActive ? "text-gray-400 hover:text-rose-600" : "text-gray-400 hover:text-amber-600")}
+                         onClick={() => toggleMutation.mutate(notice._id)}
+                         isLoading={toggleMutation.isPending && toggleMutation.variables === notice._id}
+                       >
+                          {notice.isActive ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
                        </Button>
                        <Button 
                          variant="ghost" 
