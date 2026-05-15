@@ -37,10 +37,10 @@ export const getApiErrorMessage = (error, fallback = 'Something went wrong') => 
 
 const buildHeaders = (data, headers = {}) => {
   if (data instanceof FormData) {
-    return {
-      ...headers,
-      'Content-Type': 'multipart/form-data',
-    };
+    const nextHeaders = { ...headers };
+    delete nextHeaders['Content-Type'];
+    delete nextHeaders['content-type'];
+    return nextHeaders;
   }
 
   return headers;
