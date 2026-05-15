@@ -38,9 +38,13 @@ export default function EventReviewPage() {
     return [];
   };
 
-  const { data: eventsData, isLoading, isError, error } = useQuery({
-    queryKey: ['advisee-pending-events'],
-    queryFn: () => getAdviseePendingEvents(),
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(50); // larger default so faculty see more at once
+
+  const { data: eventsData, isLoading, isError, error, isFetching } = useQuery({
+    queryKey: ['advisee-pending-events', page, limit],
+    queryFn: () => getAdviseePendingEvents({ page, limit }),
+    keepPreviousData: true,
   });
 
   const events = useMemo(() => normalizeList(eventsData), [eventsData]);
@@ -233,6 +237,18 @@ export default function EventReviewPage() {
               )}
             </Motion.div>
           ))}
+          {/* Pagination / load more */}
+          {eventsData?.pagination && eventsData.pagination.page < eventsData.pagination.totalPages && (
+            <div className="p-6 flex justify-center">
+              <button
+                onClick={() => setPage((p) => p + 1)}
+                disabled={isFetching}
+                className="px-4 py-2 rounded-lg bg-indigo-600 text-white"
+              >
+                {isFetching ? 'Loading...' : 'Load more'}
+              </button>
+            </div>
+          )}
         </div>
       )}
 
