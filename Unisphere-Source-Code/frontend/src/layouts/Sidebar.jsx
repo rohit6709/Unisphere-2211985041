@@ -27,6 +27,7 @@ const NAV_CONFIG = {
         { name: 'Clubs', path: '/clubs', icon: Users },
         { name: 'My Clubs', path: '/my-clubs', icon: BookMarked },
         { name: 'My Registrations', path: '/my-registrations', icon: ClipboardList },
+        { name: 'My Submitted Events', path: '/events/my-submitted', icon: ClipboardCheck },
       ],
     },
     {
@@ -57,7 +58,8 @@ const NAV_CONFIG = {
       links: [
         { name: 'My Clubs', path: '/faculty/clubs', icon: Users },
         { name: 'Request Club', path: '/clubs/request', icon: Building2 },
-        { name: 'Event Review', path: '/faculty/events', icon: ClipboardCheck },
+          // { name: 'Events', path: '/faculty/events', icon: ClipboardCheck },
+        { name: 'Event Review', path: '/faculty/events/review', icon: ClipboardList },
       ],
     },
     {
