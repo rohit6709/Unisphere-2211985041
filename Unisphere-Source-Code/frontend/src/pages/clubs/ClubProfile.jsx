@@ -107,8 +107,18 @@ export default function ClubProfile() {
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-10">
       {/* Dynamic Header */}
       <section className="relative rounded-[3rem] overflow-hidden bg-gray-900 dark:bg-black h-75 sm:h-100">
+        {club.bannerUrl ? (
+          <img
+            src={club.bannerUrl}
+            alt={`${club.name} banner`}
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        ) : (
+          <div className="absolute inset-0 bg-linear-to-br from-indigo-600 via-violet-600 to-fuchsia-600" />
+        )}
         <div className="absolute inset-0 bg-linear-to-br from-indigo-600/40 to-purple-800/40 mix-blend-overlay" />
         <div className="absolute inset-0 bg-linear-to-t from-black via-black/20 to-transparent" />
+        <div className="absolute inset-0 bg-black/10" />
         
         <button 
           onClick={() => navigate(-1)}
@@ -119,8 +129,18 @@ export default function ClubProfile() {
 
         <div className="absolute bottom-10 left-10 right-10 flex flex-col md:flex-row md:items-end justify-between gap-8">
           <div className="flex flex-col sm:flex-row items-center sm:items-end gap-6 text-center sm:text-left">
-            <div className="h-32 w-32 rounded-4xl bg-white p-2 shadow-2xl flex items-center justify-center text-5xl font-black text-indigo-600 border-4 border-white/20">
-              {getInitials(club.name)}
+            <div className="h-32 w-32 rounded-4xl bg-white p-2 shadow-2xl flex items-center justify-center overflow-hidden border-4 border-white/20">
+              {club.logoUrl ? (
+                <img
+                  src={club.logoUrl}
+                  alt={`${club.name} logo`}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                <span className="text-5xl font-black text-indigo-600">
+                  {getInitials(club.name)}
+                </span>
+              )}
             </div>
             <div className="space-y-2">
               <div className="flex flex-wrap justify-center sm:justify-start gap-2">
