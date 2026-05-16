@@ -75,14 +75,33 @@ export default function ClubDetailPage() {
 
       {/* Profile Header */}
       <div className="relative h-[45vh] min-h-87.5 w-full">
-         <div className="absolute inset-0 bg-linear-to-br from-indigo-600 via-violet-600 to-fuchsia-600" />
+             {club.bannerUrl ? (
+                <img
+                   src={club.bannerUrl}
+                   alt={`${club.name} banner`}
+                   className="absolute inset-0 h-full w-full object-cover"
+                />
+             ) : (
+                <div className="absolute inset-0 bg-linear-to-br from-indigo-600 via-violet-600 to-fuchsia-600" />
+             )}
          <div className="absolute inset-0 opacity-10 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/cubes.png')]" />
+             <div className="absolute inset-0 bg-black/20" />
          
          <div className="absolute inset-0 flex items-end">
             <div className="max-w-7xl mx-auto px-4 w-full pb-10">
                <div className="flex flex-col md:flex-row items-end gap-8">
-                  <div className="h-40 w-40 rounded-[2.5rem] bg-white dark:bg-gray-900 border-8 border-white dark:border-gray-900 shadow-2xl flex items-center justify-center text-4xl font-black text-indigo-600 shrink-0">
-                     {getInitials(club.name)}
+                  <div className="h-40 w-40 rounded-[2.5rem] bg-white dark:bg-gray-900 border-8 border-white dark:border-gray-900 shadow-2xl flex items-center justify-center overflow-hidden shrink-0">
+                     {club.logoUrl ? (
+                        <img
+                           src={club.logoUrl}
+                           alt={`${club.name} logo`}
+                           className="h-full w-full object-cover"
+                        />
+                     ) : (
+                        <span className="text-4xl font-black text-indigo-600">
+                           {getInitials(club.name)}
+                        </span>
+                     )}
                   </div>
                   <div className="flex-1 space-y-4 mb-4">
                      <div className="flex flex-wrap gap-2">
